@@ -25,6 +25,14 @@ kecil** mengelola petak kebun, mencatat riwayat tanam, merencanakan rotasi tanam
 | Observasi | Catat observasi per petak: kategori (hama, penyakit, pertumbuhan, cuaca, lainnya), tanggal, deskripsi, tautan ke siklus tanam. Catatan hama/penyakit ikut dibaca perencana rotasi. |
 | Ekspor | CSV untuk **riwayat penanaman**, **hasil uji tanah**, dan **observasi** (pemisah titik koma + BOM UTF-8 agar ramah Excel locale Indonesia). Tombol PDF **sengaja tidak disediakan** karena ekspor PDF belum dapat dibuat andal di implementasi ini. |
 
+Selain itu ada **widget Trakteer mengambang** di pojok kanan bawah setiap halaman: tombol oranye berlabel
+*“Web app ini gratis & bebas iklan. Kopi kecil, server tetap jalan”*. Saat diklik, sebuah dialog muncul **tanpa
+berpindah halaman** berisi:
+
+- pilihan nominal traktiran mulai **Rp6.000** dan kelipatannya (6/12/18/24/30/60 ribu + tombol +/− Rp6.000),
+- **QR code** yang dibuat langsung di peramban (mengarah ke halaman Trakteer), dan
+- tautan **unduh source code** lengkap web app ini (repo GitHub atau berkas `.zip`).
+
 ---
 
 ## 2. Keputusan teknis (penting dibaca)
@@ -246,3 +254,20 @@ instrumentation.ts             # seed otomatis saat server start
   dan fokus terlihat jelas.
 - Palet alami (moss/clay/soil/cream) dengan kontras teks yang memenuhi WCAG AA pada ukuran teks yang dipakai.
 - Preferensi `prefers-reduced-motion` dihormati.
+
+---
+
+## 11. Dukung proyek & lisensi
+
+**Open Source oleh MZF — 2026.** Source code lengkap web app ini tersedia untuk siapa saja — bebas dipakai,
+dipelajari, dimodifikasi, dan didistribusikan ulang sesuai lisensi MIT (lihat berkas [LICENSE](./LICENSE)).
+
+- Repository: <https://github.com/guediperpustakaan-cpu/rotanami-gardening-management-app-4-gdp>
+- Unduh source (.zip): <https://github.com/guediperpustakaan-cpu/rotanami-gardening-management-app-4-gdp/archive/refs/heads/main.zip>
+- Tombol unduh juga tersedia di **halaman Pengaturan** dan di dialog widget Trakteer.
+
+Rotanami tidak memasang iklan dan tidak memungut biaya apa pun. Bila aplikasi ini membantu dan Anda ingin
+mendukung pengembangan serta biaya server, traktir kopi kecil melalui Trakteer:
+<https://trakteer.id/perpus_opera/> — lewat tombol mengambang atau langsung. Traktiran bersifat sukarela;
+semua fitur tetap bisa dipakai sepenuhnya tanpa bertraktir.
+

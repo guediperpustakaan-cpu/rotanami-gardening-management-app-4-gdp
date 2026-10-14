@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarRange, Download, KeyRound, Leaf, LogOut, Pencil, Plus, Trash2, UserRound } from "lucide-react";
+import { CalendarRange, Code2, Coffee, Download, KeyRound, Leaf, LogOut, Pencil, Plus, Trash2, UserRound } from "lucide-react";
 import { ApiClientError, api, unduhCsv, useApi } from "@/lib/api";
+import { KREDIT_OPEN_SOURCE, SOURCE_REPO_URL, SOURCE_ZIP_URL, TRAKTEER_URL } from "@/lib/site";
 import { useShell } from "@/components/shell";
 import {
   Badge,
@@ -371,6 +372,44 @@ export default function PengaturanPage() {
           <li>Tidak ada fitur berbayar, iklan, atau integrasi komersial.</li>
           <li>Data setiap pengguna dipisahkan di level API dan database melalui kepemilikan kebun dan daftar anggota.</li>
         </ul>
+      </Card>
+
+      <Card className="mt-4">
+        <SectionTitle>Open source & dukungan</SectionTitle>
+        <p className="text-sm text-soil-700">
+          {KREDIT_OPEN_SOURCE}. Source code lengkap web app ini tersedia untuk siapa saja — bebas dipakai, dipelajari, dan
+          dimodifikasi. Jika Rotanami membantu, Anda bisa traktir kopi kecil lewat tombol mengambang di pojok kanan bawah
+          layar.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a
+            href={SOURCE_REPO_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-soil-300 bg-white px-4 text-sm font-semibold text-soil-800 shadow-sm hover:bg-soil-50"
+          >
+            <Code2 className="size-4" aria-hidden="true" />
+            Repository GitHub
+          </a>
+          <a
+            href={SOURCE_ZIP_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-soil-300 bg-white px-4 text-sm font-semibold text-soil-800 shadow-sm hover:bg-soil-50"
+          >
+            <Download className="size-4" aria-hidden="true" />
+            Unduh source code (.zip)
+          </a>
+          <a
+            href={TRAKTEER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#c43a2e] bg-[#e85745] px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#d94a39]"
+          >
+            <Coffee className="size-4" aria-hidden="true" />
+            Traktir kopi
+          </a>
+        </div>
       </Card>
 
       <FarmFormDialog
