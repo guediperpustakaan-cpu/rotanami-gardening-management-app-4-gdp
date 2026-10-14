@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   cropSchema,
@@ -29,7 +29,7 @@ import type {
   SeasonDto,
   SoilTestDto,
 } from "@/lib/types";
-import { Button, Checkbox, ErrorNote, Field, Input, Modal, Select, Textarea, useToast } from "@/components/ui";
+import { Button, Checkbox, ErrorNote, Field, Input, Modal, Select, Textarea, useDialogPesan, useToast } from "@/components/ui";
 
 type DialogProps = { open: boolean; onClose: () => void; onSaved?: () => void };
 
@@ -51,7 +51,7 @@ function FormError({ children }: { children: ReactNode }) {
 
 export function FarmFormDialog({ open, onClose, onSaved, farm }: DialogProps & { farm?: FarmDto | null }) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = { name: string; location: string; timezone: string; notes: string };
   const nilaiAwal = useMemo<Nilai>(
     () => ({
@@ -69,7 +69,6 @@ export function FarmFormDialog({ open, onClose, onSaved, farm }: DialogProps & {
   useEffect(() => {
     if (open) {
       reset(nilaiAwal);
-      setPesan(null);
     }
   }, [open, nilaiAwal, reset]);
 
@@ -136,7 +135,7 @@ export function FarmFormDialog({ open, onClose, onSaved, farm }: DialogProps & {
 
 export function PlotFormDialog({ open, onClose, onSaved, farmId, plot }: DialogProps & { farmId: string; plot?: PlotDto | null }) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = { farmId: string; name: string; size: string; areaUnit: string; soilType: string; notes: string };
   const nilaiAwal = useMemo<Nilai>(
     () => ({
@@ -156,7 +155,6 @@ export function PlotFormDialog({ open, onClose, onSaved, farmId, plot }: DialogP
   useEffect(() => {
     if (open) {
       reset(nilaiAwal);
-      setPesan(null);
     }
   }, [open, nilaiAwal, reset]);
 
@@ -233,7 +231,7 @@ export function CropFormDialog({
   crop,
 }: DialogProps & { farmId: string; families: FamilyDto[]; crop?: CropDto | null }) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = { name: string; scientificName: string; familyId: string; nutrientCategory: string; isCoverCrop: boolean; guideNotes: string };
   const nilaiAwal = useMemo<Nilai>(
     () => ({
@@ -253,7 +251,6 @@ export function CropFormDialog({
   useEffect(() => {
     if (open) {
       reset(nilaiAwal);
-      setPesan(null);
     }
   }, [open, nilaiAwal, reset]);
 
@@ -328,7 +325,7 @@ export function CropFormDialog({
 
 export function FamilyFormDialog({ open, onClose, onSaved }: DialogProps) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = { name: string; rotationGroup: string; description: string };
   const { register, handleSubmit, reset, setError, formState } = useForm<Nilai>({
     resolver: zodResolver(familySchema) as unknown as Resolver<Nilai>,
@@ -337,7 +334,6 @@ export function FamilyFormDialog({ open, onClose, onSaved }: DialogProps) {
   useEffect(() => {
     if (open) {
       reset({ name: "", rotationGroup: "", description: "" });
-      setPesan(null);
     }
   }, [open, reset]);
 
@@ -388,7 +384,7 @@ export function FamilyFormDialog({ open, onClose, onSaved }: DialogProps) {
 
 export function SeasonFormDialog({ open, onClose, onSaved, farmId, season }: DialogProps & { farmId: string; season?: SeasonDto | null }) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = { farmId: string; name: string; startDate: string; endDate: string };
   const nilaiAwal = useMemo<Nilai>(
     () => ({
@@ -406,7 +402,6 @@ export function SeasonFormDialog({ open, onClose, onSaved, farmId, season }: Dia
   useEffect(() => {
     if (open) {
       reset(nilaiAwal);
-      setPesan(null);
     }
   }, [open, nilaiAwal, reset]);
 
@@ -477,7 +472,7 @@ export function PlantingFormDialog({
   fixedPlotId?: string;
 }) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = {
     plotId: string;
     cropId: string;
@@ -503,17 +498,16 @@ export function PlantingFormDialog({
     }),
     [planting, fixedPlotId, plots],
   );
-  const { register, handleSubmit, reset, setError, formState, watch } = useForm<Nilai>({
+  const { register, handleSubmit, reset, setError, formState, control } = useForm<Nilai>({
     resolver: zodResolver(plantingSchema) as unknown as Resolver<Nilai>,
     defaultValues: nilaiAwal,
   });
   useEffect(() => {
     if (open) {
       reset(nilaiAwal);
-      setPesan(null);
     }
   }, [open, nilaiAwal, reset]);
-  const status = watch("status");
+  const status = useWatch({ control, name: "status" });
 
   async function onSubmit(data: Nilai) {
     setPesan(null);
@@ -633,7 +627,7 @@ export function SoilTestFormDialog({
   fixedPlotId,
 }: DialogProps & { plots: PlotDto[]; soilTest?: SoilTestDto | null; fixedPlotId?: string }) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = {
     plotId: string;
     testDate: string;
@@ -670,7 +664,6 @@ export function SoilTestFormDialog({
   useEffect(() => {
     if (open) {
       reset(nilaiAwal);
-      setPesan(null);
     }
   }, [open, nilaiAwal, reset]);
 
@@ -777,7 +770,7 @@ export function ObservationFormDialog({
   fixedPlotId?: string;
 }) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = { plotId: string; plantingId: string; category: string; observedAt: string; description: string };
   const nilaiAwal = useMemo<Nilai>(
     () => ({
@@ -789,17 +782,16 @@ export function ObservationFormDialog({
     }),
     [observation, fixedPlotId, plots],
   );
-  const { register, handleSubmit, reset, setError, formState, watch } = useForm<Nilai>({
+  const { register, handleSubmit, reset, setError, formState, control } = useForm<Nilai>({
     resolver: zodResolver(observationSchema) as unknown as Resolver<Nilai>,
     defaultValues: nilaiAwal,
   });
   useEffect(() => {
     if (open) {
       reset(nilaiAwal);
-      setPesan(null);
     }
   }, [open, nilaiAwal, reset]);
-  const plotId = watch("plotId");
+  const plotId = useWatch({ control, name: "plotId" });
   const siklusTersedia = plantings.filter((planting) => planting.plotId === plotId);
 
   async function onSubmit(data: Nilai) {
@@ -894,7 +886,7 @@ export function ReminderFormDialog({
   reminder,
 }: DialogProps & { farmId: string; plots: PlotDto[]; reminder?: ReminderDto | null }) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = { farmId: string; plotId: string; title: string; dueDate: string; kind: string; notes: string };
   const nilaiAwal = useMemo<Nilai>(
     () => ({
@@ -914,7 +906,6 @@ export function ReminderFormDialog({
   useEffect(() => {
     if (open) {
       reset(nilaiAwal);
-      setPesan(null);
     }
   }, [open, nilaiAwal, reset]);
 
@@ -1015,7 +1006,7 @@ export function RotationPlanFormDialog({
   defaultOrigin?: "aturan" | "manual";
 }) {
   const toast = useToast();
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useDialogPesan(open);
   type Nilai = {
     plotId: string;
     seasonId: string;
@@ -1042,7 +1033,6 @@ export function RotationPlanFormDialog({
   useEffect(() => {
     if (open) {
       reset(nilaiAwal);
-      setPesan(null);
     }
   }, [open, nilaiAwal, reset]);
 

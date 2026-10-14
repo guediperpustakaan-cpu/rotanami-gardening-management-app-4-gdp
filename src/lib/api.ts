@@ -78,29 +78,30 @@ export function useApi<T>(path: string | null, deps: unknown[] = []): ResourceSt
   }, []);
 
   useEffect(() => {
-    if (!path) {
-      setData(null);
-      setLoading(false);
-      return;
-    }
     let active = true;
-    setLoading(true);
-    setError(null);
-    api<T>(path)
-      .then((result) => {
+    const load = async () => {
+      if (!path) {
+        setData(null);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await api<T>(path);
         if (active && mounted.current) setData(result);
-      })
-      .catch((err: unknown) => {
+      } catch (err: unknown) {
         if (!active || !mounted.current) return;
         if (err instanceof ApiClientError && err.status === 401) {
           if (typeof window !== "undefined") window.location.assign("/masuk");
           return;
         }
         setError(err instanceof Error ? err.message : "Gagal memuat data.");
-      })
-      .finally(() => {
+      } finally {
         if (active && mounted.current) setLoading(false);
-      });
+      }
+    };
+    void load();
     return () => {
       active = false;
     };

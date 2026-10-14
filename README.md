@@ -111,6 +111,22 @@ Anda).
 3. Tempel ke `DATABASE_URL` di `.env`. Jangan masukkan ke variabel `NEXT_PUBLIC_*`.
 4. Jalankan `npx drizzle-kit push`.
 
+### Deploy ke Vercel
+
+1. Impor repositori ini ke Vercel (framework **Next.js** terdeteksi otomatis).
+2. Tambahkan environment variable di **Settings → Environment Variables**:
+   - `DATABASE_URL` — connection string Neon (host `-pooler`), dicentang untuk
+     **Production** dan **Preview**. Dibutuhkan **saat build** (collecting page data)
+     dan saat runtime.
+   - `SEED_DEMO_DATA` — opsional; biarkan kosong/`true` agar katalog & akun contoh
+     dibuat saat fungsi server pertama kali menyala (idempoten, aman berulang).
+3. Deploy. Skema sudah diterapkan dari lokal lewat `drizzle-kit push`/`migrate`
+   (atau jalankan perintah itu sekali lagi setelah deploy bila schema berubah).
+
+Catatan: host `.neon.tech` membuat aplikasi otomatis memakai driver HTTP
+serverless Neon (`@neondatabase/serverless`) — cocok untuk lingkungan serverless
+Vercel tanpa pool TCP.
+
 ---
 
 ## 4. Variabel lingkungan

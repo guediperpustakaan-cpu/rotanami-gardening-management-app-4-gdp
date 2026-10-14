@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, Info, ListChecks, RefreshCw, Save, Sparkles } from "lucide-react";
 import { api, useApi } from "@/lib/api";
 import { useShell } from "@/components/shell";
@@ -41,20 +41,18 @@ export default function RotasiPage() {
   const katalog = useApi<{ crops: CropDto[] }>(activeFarmId ? `/katalog/tanaman?farmId=${activeFarmId}` : null, [activeFarmId]);
   const rencana = useApi<{ plans: RotationPlanDto[] }>(activeFarmId ? `/rencana-rotasi?farmId=${activeFarmId}` : null, [activeFarmId]);
 
-  const daftarPetak = petak.data?.plots ?? [];
-  const daftarMusim = musim.data?.seasons ?? [];
+  const daftarPetak = useMemo(() => petak.data?.plots ?? [], [petak.data]);
+  const daftarMusim = useMemo(() => musim.data?.seasons ?? [], [musim.data]);
   const daftarRencana = rencana.data?.plans ?? [];
 
-  useEffect(() => {
-    if (!plotId && daftarPetak.length > 0) setPlotId(daftarPetak[0]!.id);
-  }, [daftarPetak, plotId]);
-
-  useEffect(() => {
-    if (!seasonId && daftarMusim.length > 0) {
-      const today = new Date().toISOString().slice(0, 10);
-      const aktif = daftarMusim.find((item) => item.startDate <= today && today <= item.endDate) ?? daftarMusim[0]!;
-      setSeasonId(aktif.id);
-    }
+  // Pilihan efektif: pakai pilihan pengguna, atau default otomatis (petak
+  // pertama / musim yang aktif hari ini). Nilai turunan, bukan state, agar
+  // tidak perlu setState di dalam effect.
+  const plotIdEfektif = plotId || daftarPetak[0]?.id || "";
+  const seasonIdEfektif = useMemo(() => {
+    if (seasonId) return seasonId;
+    const today = new Date().toISOString().slice(0, 10);
+    return (daftarMusim.find((item) => item.startDate <= today && today <= item.endDate) ?? daftarMusim[0])?.id ?? "";
   }, [daftarMusim, seasonId]);
 
   function gantiPetak(value: string) {
@@ -64,14 +62,14 @@ export default function RotasiPage() {
   }
 
   async function mintaSaran() {
-    if (!plotId) {
+    if (!plotIdEfektif) {
       setError("Pilih petak terlebih dahulu.");
       return;
     }
     setMemuat(true);
     setError(null);
     try {
-      const result = await api<RotationSuggestionResult>("/rotasi/saran", { method: "POST", body: { plotId } });
+      const result = await api<RotationSuggestionResult>("/rotasi/saran", { method: "POST", body: { plotId: plotIdEfektif } });
       setHasil(result);
       if (result.status === "kurang") {
         toast.push("Data belum cukup untuk saran spesifik. Anda tetap dapat memilih tanaman secara manual.", "info");
@@ -108,7 +106,7 @@ export default function RotasiPage() {
     }
   }
 
-  const plotTerpilih = daftarPetak.find((item) => item.id === plotId) ?? null;
+  const plotTerpilih = daftarPetak.find((item) => item.id === plotIdEfektif) ?? null;
 
   return (
     <>
@@ -136,7 +134,7 @@ export default function RotasiPage() {
           <Card className="mb-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Petak yang direncanakan" htmlFor="rotasi-petak" required hint={plotTerpilih?.lastPlanting ? `Tanaman terakhir: ${plotTerpilih.lastPlanting.cropName}` : "Petak ini belum punya riwayat tanam"}>
-                <Select id="rotasi-petak" value={plotId} onChange={(event) => gantiPetak(event.target.value)}>
+                <Select id="rotasi-petak" value={plotIdEfektif} onChange={(event) => gantiPetak(event.target.value)}>
                   <option value="">Pilih petak</option>
                   {daftarPetak.map((plot) => (
                     <option key={plot.id} value={plot.id}>
@@ -146,7 +144,7 @@ export default function RotasiPage() {
                 </Select>
               </Field>
               <Field label="Musim / rentang waktu" htmlFor="rotasi-musim" hint="Musim dipakai saat menyimpan rencana, bukan untuk menghitung masa jeda.">
-                <Select id="rotasi-musim" value={seasonId} onChange={(event) => setSeasonId(event.target.value)}>
+                <Select id="rotasi-musim" value={seasonIdEfektif} onChange={(event) => setSeasonId(event.target.value)}>
                   <option value="">Tanpa musim</option>
                   {daftarMusim.map((season) => (
                     <option key={season.id} value={season.id}>
@@ -157,7 +155,7 @@ export default function RotasiPage() {
               </Field>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button icon={<Sparkles className="size-4" aria-hidden="true" />} loading={memuat} onClick={() => void mintaSaran()} disabled={!plotId}>
+              <Button icon={<Sparkles className="size-4" aria-hidden="true" />} loading={memuat} onClick={() => void mintaSaran()} disabled={!plotIdEfektif}>
                 Minta saran tanaman berikutnya
               </Button>
               <Button
@@ -316,9 +314,9 @@ export default function RotasiPage() {
                     setCropTerpilih(null);
                     setDialog("manual");
                   }}
-                  disabled={!plotId}
-                >
-                  Buat rencana manual
+                disabled={!plotIdEfektif}
+              >
+                Buat rencana manual
                 </Button>
               }
             />
@@ -352,9 +350,9 @@ export default function RotasiPage() {
           crops={katalog.data?.crops ?? []}
           seasons={daftarMusim}
           plan={dialog === "ubah" ? ubahPlan : null}
-          defaultPlotId={plotId}
+          defaultPlotId={plotIdEfektif}
           defaultCropId={cropTerpilih?.id}
-          defaultSeasonId={seasonId}
+          defaultSeasonId={seasonIdEfektif}
           defaultOrigin={dialog === "aturan" ? "aturan" : "manual"}
           onSaved={() => {
             rencana.reload();

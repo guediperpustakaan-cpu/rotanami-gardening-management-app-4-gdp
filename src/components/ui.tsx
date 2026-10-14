@@ -331,6 +331,21 @@ export function Modal({
 }
 
 /**
+ * State pesan error yang otomatis dikosongkan setiap kali dialog dibuka.
+ * Memakai pola "menyesuaikan state saat prop berubah" (dipanggil saat render),
+ * bukan useEffect — lihat https://react.dev/learn/you-might-not-need-an-effect
+ */
+export function useDialogPesan(open: boolean): readonly [string | null, (value: string | null) => void] {
+  const [pesan, setPesan] = useState<string | null>(null);
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) setPesan(null);
+  }
+  return [pesan, setPesan] as const;
+}
+
+/**
  * Dialog konfirmasi. Untuk data penting (kebun/petak/tanaman) pengguna harus
  * mengetik ulang namanya agar penghapusan tidak terjadi tanpa sengaja.
  */
@@ -358,11 +373,13 @@ export function ConfirmDialog({
   children?: ReactNode;
 }) {
   const [typed, setTyped] = useState("");
+  const [prevOpen, setPrevOpen] = useState(open);
+  // Kosongkan teks setiap kali dialog dibuka/ditutup (pola state saat render, bukan effect).
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    setTyped("");
+  }
   const inputId = useId();
-
-  useEffect(() => {
-    if (open) setTyped("");
-  }, [open]);
 
   const mismatch = Boolean(requireName) && typed.trim() !== requireName!.trim();
 
